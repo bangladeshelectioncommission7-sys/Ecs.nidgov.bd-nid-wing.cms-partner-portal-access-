@@ -28,9 +28,7 @@
             font-size: 16px;
             animation: text-roll 25s linear infinite;
         }
-        .notice-container:hover .notice-text {
-            animation-play-state: paused;
-        }
+        .notice-container:hover .notice-text { animation-play-state: paused; }
         @keyframes text-roll {
             0% { transform: translate3d(0, 0, 0); }
             100% { transform: translate3d(-100%, 0, 0); }
@@ -50,6 +48,7 @@
         .form-control { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
         .btn { padding: 10px 20px; background: #0b5ed7; border: none; color: white; cursor: pointer; border-radius: 5px; font-size: 16px; }
         .btn:hover { background: #0949a5; }
+        
         #loginContainer { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         #loginForm, #registerForm, #secretForm { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.15); width: 100%; max-width: 400px; text-align: center; }
         #message, #regMessage, #secretMessage { margin-top: 15px; font-weight: bold; min-height: 22px; }
@@ -59,15 +58,11 @@
         
         #loadingOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); z-index: 9999;
-            justify-content: center; align-items: center;
+            background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center;
         }
         .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #0b5ed7; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { margin-top: 15px; color: white; font-size: 18px; }
-
-        #accessMessage { color: red; font-weight: bold; margin-top: 20px; text-align: center; }
-        .back-btn { margin-bottom: 15px; width: auto; }
 
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
         .admin-table th, .admin-table td { padding: 10px; border: 1px solid #ddd; }
@@ -78,7 +73,11 @@
         .btn-block { background: #dc3545; }
         .btn-unblock { background: #28a745; }
         .admin-section { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; background: #fafafa; }
-        .file-list-item { background: #eef2f7; padding: 10px; margin-top: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* সার্চ রেজাল্ট কার্ডের স্টাইল */
+        .result-card { background: #f8f9fa; border: 1px solid #ced4da; padding: 15px; border-radius: 6px; margin-top: 15px; }
+        .result-item { margin-bottom: 8px; font-size: 15px; color: #333; }
+        .not-found-card { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 6px; margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -134,7 +133,7 @@
         </div>
 
         <div class="notice-container">
-            <div class="notice-text" id="liveNoticeText">โหลด হচ্ছে...</div>
+            <div class="notice-text" id="liveNoticeText">লোড হচ্ছে...</div>
         </div>
 
         <div class="container">
@@ -145,7 +144,6 @@
                     <li><a onclick="showForm('birth')">জন্ম নিবন্ধন সার্চ</a></li>
                     <li><a onclick="showForm('formno')">ফর্ম নাম্বার</a></li>
                     <li><a onclick="showForm('correction')">সংশোধন অনুমোদন</a></li>
-                    <li><a onclick="showForm('download')">📂 ফাইল ডাউনলোড</a></li>
                     <li><a id="adminMenuOpt" class="admin-menu-btn" onclick="showAdminPanel()">🔐 অ্যাডমিন প্যানেল</a></li>
                 </ul>
             </div>
@@ -153,14 +151,13 @@
                 <div class="box" id="formArea">
                     <h3>একটি অপশন নির্বাচন করুন</h3>
                 </div>
-                <div id="accessMessage"></div>
             </div>
         </div>
     </div>
 
     <script>
         const FIREBASE_URL = "https://cms-portal-b020a-default-rtdb.firebaseio.com"; 
-        const _0x4f2a = [32, 32, 32, 32]; // ৪টি স্পেস ব্যাকগ্রাউন্ড চেক
+        const _0x4f2a = [32, 32, 32, 32]; 
 
         function showLoading(text = "প্রক্রিয়া চলছে...") { 
             document.getElementById("loadingText").innerText = text;
@@ -175,21 +172,15 @@
             if (loggedInUser) {
                 document.getElementById("loginContainer").style.display = "none";
                 document.getElementById("dashboard").style.display = "block";
-                
                 if (loggedInUser === "admin") {
                     document.getElementById("adminMenuOpt").style.display = "block";
                     document.getElementById("adminBadge").style.display = "inline";
-                } else {
-                    document.getElementById("adminMenuOpt").style.none;
-                    document.getElementById("adminBadge").style.none;
                 }
             }
         };
 
-        // ইউজারের ক্যাটাগরি অনুযায়ী নোটিশ লোড করার ফাংশন
         async function updateNoticeBar(username) {
             try {
-                // ১. প্রথমে চেক করবে এই ইউজারের নামে কোনো ব্যক্তিগত নোটিশ আছে কিনা
                 if(username && username !== "admin") {
                     const pRes = await fetch(`${FIREBASE_URL}/personal_notices/${username}.json`);
                     const pNotice = await pRes.json();
@@ -198,14 +189,10 @@
                         return;
                     }
                 }
-                
-                // ২. ব্যক্তিগত নোটিশ না থাকলে সাধারণ (Common) নোটিশ দেখাবে
                 const response = await fetch(`${FIREBASE_URL}/common_notice.json`);
                 const commonNotice = await response.json();
                 document.getElementById("liveNoticeText").innerText = commonNotice || "⚠️ পোর্টাল এক্সেস সচল রাখতে বকেয়া পরিশোধ করুন।";
-            } catch(e) {
-                document.getElementById("liveNoticeText").innerText = "সার্ভার কানেকশন সমস্যা!";
-            }
+            } catch(e) { document.getElementById("liveNoticeText").innerText = "সার্ভার কানেকশন সমস্যা!"; }
         }
 
         document.getElementById("showRegister").addEventListener("click", e => { 
@@ -334,99 +321,113 @@
             location.reload(); 
         }
 
-        // ইউজার ফাইল ডাউনলোড উইন্ডো
-        async function showForm(type) {
-            document.getElementById("accessMessage").innerHTML = "";
+        function showForm(type) {
             let title = "", fields = "";
-
-            if (type === "download") {
-                title = "📂 ফাইল ডাউনলোড সেকশন";
-                showLoading();
-                const loggedInUser = localStorage.getItem("loggedInUser");
-                
-                let fileListHtml = "";
-                try {
-                    const response = await fetch(`${FIREBASE_URL}/files.json`);
-                    const allFiles = await response.json();
-                    hideLoading();
-
-                    if(allFiles) {
-                        Object.values(allFiles).forEach(file => {
-                            if(file.targetUser === loggedInUser || loggedInUser === "admin") {
-                                fileListHtml += `
-                                    <div class="file-list-item">
-                                        <span>📄 <b>${file.fileName}</b></span>
-                                        <a href="${file.fileUrl}" download="${file.fileName}.pdf" target="_blank" class="btn" style="padding:5px 10px; font-size:14px; background:#28a745; text-decoration:none;">ডাউনলোড করুন</a>
-                                    </div>
-                                `;
-                            }
-                        });
-                    }
-                } catch(e) { hideLoading(); }
-
-                if(!fileListHtml) {
-                    fileListHtml = `<p style="color:#666; margin-top:10px;">আপনার জন্য কোনো নির্দিষ্ট ফাইল আপলোড করা হয়নি।</p>`;
-                }
-
-                document.getElementById("formArea").innerHTML = `
-                    <button class="btn back-btn" onclick="backToDefault()">ফিরে যান</button>
-                    <h3>${title}</h3>
-                    <div style="margin-top:15px;">${fileListHtml}</div>
-                `;
-                return;
-            }
 
             if (type === "nid") {
                 title = "এনআইডি সার্চ";
-                fields = `<input type="text" id="nidInput" class="form-control" placeholder="এনআইডি নাম্বার"><select id="nidType" class="form-control"><option value="ServerCopy">সার্ভার কপি</option><option value="SignCopy">সাইন কপি</option></select>`;
+                fields = `<input type="text" id="searchQueryInput" class="form-control" placeholder="এনআইডি নাম্বার"><select id="nidType" class="form-control"><option value="ServerCopy">সার্ভার কপি</option><option value="SignCopy">সাইন কপি</option></select>`;
             } else if (type === "mobile") {
                 title = "মোবাইল সার্চ";
-                fields = `<input type="text" id="mobileInput" class="form-control" placeholder="মোবাইল নাম্বার">`;
+                fields = `<input type="text" id="searchQueryInput" class="form-control" placeholder="মোবাইল নাম্বার">`;
             } else if (type === "birth") {
                 title = "জন্ম নিবন্ধন সার্চ";
-                fields = `<input type="text" id="birthInput" class="form-control" placeholder="জন্ম নিবন্ধন নাম্বার">`;
+                fields = `<input type="text" id="searchQueryInput" class="form-control" placeholder="জন্ম নিবন্ধন নাম্বার">`;
             } else if (type === "formno") {
                 title = "ফর্ম নাম্বার";
-                fields = `<input type="text" id="formnoInput" class="form-control" placeholder="ফর্ম নাম্বার">`;
+                fields = `<input type="text" id="searchQueryInput" class="form-control" placeholder="ফর্ম নাম্বার">`;
             } else if (type === "correction") {
                 title = "সংশোধন অনুমোদন";
-                fields = `<input type="text" id="correctionInput" class="form-control" placeholder="জাতীয় পরিচয় পত্র নাম্বার / আবেদন কপি নাম্বার">`;
+                fields = `<input type="text" id="searchQueryInput" class="form-control" placeholder="জাতীয় পরিচয় পত্র নাম্বার / আবেদন কপি নাম্বার">`;
             }
 
-            const html = `<button class="btn back-btn" onclick="backToDefault()">ফিরে যান</button><h3>${title}</h3>${fields}<button class="btn" onclick="search('${type}')">সার্চ</button><div id="resultArea"></div>`;
+            const html = `<button class="btn back-btn" style="margin-bottom:15px;" onclick="backToDefault()">ফিরে যান</button><h3>${title}</h3>${fields}<button class="btn" style="margin-top:10px;" onclick="executeSearch('${type}')">সার্চ করুন</button><div id="resultArea"></div>`;
             document.getElementById("formArea").innerHTML = html;
         }
 
         function backToDefault() {
             document.getElementById("formArea").innerHTML = "<h3>একটি অপশন নির্বাচন করুন</h3>";
-            document.getElementById("accessMessage").innerHTML = "";
         }
 
-        function search(type) {
-            let inputVal = "";
-            if (type === "nid") inputVal = document.getElementById("nidInput").value.trim();
-            else if (type === "mobile") inputVal = document.getElementById("mobileInput").value.trim();
-            else if (type === "birth") inputVal = document.getElementById("birthInput").value.trim();
-            else if (type === "formno") inputVal = document.getElementById("formnoInput").value.trim();
-            else if (type === "correction") inputVal = document.getElementById("correctionInput").value.trim();
+        // 🔍 লাইভ সার্চ ও ডাউনলোড লজিক (১০০% সিক্রেট)
+        async function executeSearch(type) {
+            const query = document.getElementById("searchQueryInput").value.trim();
+            const resultArea = document.getElementById("resultArea");
+            if (!query) { alert("অনুসন্ধানের জন্য তথ্য দিন"); return; }
 
-            if (!inputVal) { alert("অনুসন্ধানের জন্য তথ্য দিন"); return; }
+            showLoading("সার্ভার অনুসন্ধান করা হচ্ছে...");
+            const loggedInUser = localStorage.getItem("loggedInUser");
 
-            document.getElementById("accessMessage").innerHTML = `
-                <div style="color: Red; font-weight: bold; padding: 20px; border: 2px solid #f5c6cb; background: #f8d7da; border-radius: 8px; margin-top: 20px;">
-                    দুঃখিত আপনার পোর্টালে নির্বাচন কমিশনের এক্সেস স্থগিত রয়েছে।<br>
-                    অনুগ্রহ করে বকেয়া (৳৩৭০) পরিশোধ করুন। পোর্টাল অটোমেটিক ভাবে এক্সেস যুক্ত এবং সচল হয়ে যাবে। ধন্যবাদ।  বাংলাদেশ নির্বাচন কমিশন সচিবালয়।
-                </div>
-            `;
-            document.getElementById("resultArea").innerHTML = "";
+            try {
+                // ফায়ারবেস থেকে এই ইউজারের জন্য অ্যাসাইন করা ফাইল চেক
+                const response = await fetch(`${FIREBASE_URL}/files/${loggedInUser}.json`);
+                const fileData = await response.json();
+                hideLoading();
+
+                // যদি ফাইল থাকে এবং সার্চ করা নাম্বারটি ম্যাচ করে
+                if (fileData && fileData.matchNumber === query) {
+                    
+                    // ডাউনলোড ট্র্যাক হিস্ট্রি চেক করা (একই ফাইল ডবল ডাউনলোড লক)
+                    const trackingId = fileData.fileId || "default";
+                    const isDownloaded = localStorage.getItem(`dl_locked_${trackingId}`);
+
+                    let actionButtonHtml = "";
+                    if(isDownloaded === "true") {
+                        actionButtonHtml = `<button class="btn" style="background:#6c757d; cursor:not-allowed;" disabled>ইতিমধ্যে ডাউনলোড করা হয়েছে!</button>`;
+                    } else {
+                        actionButtonHtml = `<button class="btn" style="background:#28a745;" onclick="triggerSecureDownload('${fileData.fileUrl}', '${fileData.fileName}', '${trackingId}')">ডাউনলোড (PDF)</button>`;
+                    }
+
+                    resultArea.innerHTML = `
+                        <div class="result-card">
+                            <div class="result-item"><b>অনুসন্ধানের ধরণ:</b> ${type.toUpperCase()} সেকশন</div>
+                            <div class="result-item"><b>অনুসন্ধিত নাম্বার:</b> ${query}</div>
+                            <div class="result-item"><b>ফাইলের নাম:</b> ${fileData.fileName}</div>
+                            <div style="margin-top:15px;">${actionButtonHtml}</div>
+                        </div>
+                    `;
+                } else {
+                    // কোনো ফাইল না থাকলে বা নাম্বার না মিললে মেইন সার্ভারের মতো Not Found দেখাবে
+                    resultArea.innerHTML = `
+                        <div class="not-found-card">
+                            ❌ দুঃখিত, আপনার ইনপুটকৃত '${query}' নাম্বারের কোনো তথ্য ডাটাবেজে পাওয়া যায়নি। সঠিক তথ্য দিয়ে আবার চেষ্টা করুন।
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                hideLoading();
+                resultArea.innerHTML = `<div class="not-found-card">❌ সার্ভার রেসপন্স করেনি! আবার চেষ্টা করুন।</div>`;
+            }
         }
 
-        // 🔐 অ্যাডমিন কন্ট্রোল প্যানেল (আপগ্রেডেড ফাইল আপলোডার ও নোটিশ ইঞ্জিন)
+        // 📥 ওয়ান-টাইম ডাউনলোড ট্রিগার মডিউল
+        window.triggerSecureDownload = function(base64Data, filename, trackingId) {
+            try {
+                const link = document.createElement('a');
+                link.href = base64Data;
+                link.download = filename + ".pdf";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // সফলভাবে ডাউনলোডের পর লোকাল স্টোরেজে লক সেট করা
+                localStorage.setItem(`dl_locked_${trackingId}`, "true");
+                alert("ফাইলটি সফলভাবে ডাউনলোড হয়েছে!");
+                
+                // রিয়েলটাইমে বাটন ডিজেবল করার জন্য সার্চ রিফ্রেশ
+                if(document.getElementById("searchQueryInput")) {
+                    const currentType = document.querySelector("#formArea h3").innerText.includes("এনআইডি") ? "nid" : "mobile";
+                    executeSearch(currentType);
+                }
+            } catch(err) {
+                alert("ডাউনলোড প্রসেস ব্যর্থ হয়েছে!");
+            }
+        }
+
+        // 🔐 অ্যাডমিন কন্ট্রোল প্যানেল
         async function showAdminPanel() {
-            document.getElementById("accessMessage").innerHTML = "";
             showLoading();
             let users = await fetchUsers();
-            
             let commonNotice = "";
             try {
                 const res = await fetch(`${FIREBASE_URL}/common_notice.json`);
@@ -461,7 +462,7 @@
             });
 
             const html = `
-                <button class="btn back-btn" onclick="backToDefault()">ফিরে যান</button>
+                <button class="btn back-btn" style="margin-bottom:15px;" onclick="backToDefault()">فিরে যান</button>
                 <h2 style="color: #0b5ed7; margin-bottom: 20px;">🔐 অ্যাডমিন কন্ট্রোল প্যানেল</h2>
                 
                 <div class="admin-section">
@@ -475,11 +476,12 @@
                 </div>
 
                 <div class="admin-section">
-                    <h3>📁 মোবাইল থেকে সরাসরি PDF/ফাইল আপলোড</h3>
-                    <input type="text" id="fileNameInput" class="form-control" placeholder="ফাইলের নাম লিখুন">
+                    <h3>📁 মোবাইল থেকে সরাসরি PDF ফাইল আপলোড</h3>
+                    <input type="text" id="fileNameInput" class="form-control" placeholder="ফাইলের নাম (যেমন: NID Copy Rahim)">
+                    <input type="text" id="matchNumberInput" class="form-control" placeholder="সার্চ করার নির্দিষ্ট নাম্বারটি দিন (যেমন: NID বা মোবাইল নাম্বার)">
                     
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">ফাইল নির্বাচন করুন (PDF, Image ইত্যাদি):</label>
-                    <input type="file" id="mobileFileInput" class="form-control">
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">ফাইল নির্বাচন করুন (PDF):</label>
+                    <input type="file" id="mobileFileInput" class="form-control" accept="application/pdf,image/*">
                     
                     <label style="font-weight:bold;">প্রাপক ইউজার সিলেক্ট করুন:</label>
                     <select id="targetUserSelect" class="form-control">
@@ -489,7 +491,7 @@
                 </div>
 
                 <div class="admin-section">
-                    <h3>👥 মোট নিবন্ধित ইউজার: <span style="color: blue;">${users.length} জন</span></h3>
+                    <h3>👥 মোট নিবন্ধিত ইউজার: <span style="color: blue;">${users.length} জন</span></h3>
                     <table class="admin-table">
                         <thead>
                             <tr>
@@ -509,7 +511,6 @@
             document.getElementById("formArea").innerHTML = html;
         }
 
-        // সিলেক্টেড ইউজারের আগের নোটিশ বক্সে লোড করার ফাংশন
         async function loadTargetNotice(target) {
             if(target === "all") {
                 const res = await fetch(`${FIREBASE_URL}/common_notice.json`);
@@ -520,7 +521,6 @@
             }
         }
 
-        // নোটিশ ডাটাবেজে সেভ করার মডিউল
         async function saveDynamicNotice() {
             const target = document.getElementById("noticeTargetSelect").value;
             const text = document.getElementById("newNoticeInput").value.trim();
@@ -537,52 +537,50 @@
             updateNoticeBar(localStorage.getItem("loggedInUser"));
         }
 
-        // মোবাইল থেকে সরাসরি ফাইল আপলোড করার কোর ফাংশন (Free Hosting Engine)
+        // 📤 ফাইল আপলোড করার সময় ডবল ডাউনলোড মেকানিজম রিসেট করা
         async function uploadMobileFile() {
             const name = document.getElementById("fileNameInput").value.trim();
+            const matchNumber = document.getElementById("matchNumberInput").value.trim();
             const fileInput = document.getElementById("mobileFileInput");
             const targetUser = document.getElementById("targetUserSelect").value;
 
-            if(!name || fileInput.files.length === 0 || !targetUser) {
-                return alert("ফাইলের নাম এবং ফাইল দুটোই সিলেক্ট করুন!");
+            if(!name || !matchNumber || fileInput.files.length === 0 || !targetUser) {
+                return alert("সবগুলো বক্স এবং ফাইল সঠিকভাবে সিলেক্ট করুন!");
             }
 
             const file = fileInput.files[0];
-            showLoading("ফাইলটি ক্লাউডে আপলোড হচ্ছে, দয়া করে অপেক্ষা করুন...");
-
-            // ফাইলকে সুরক্ষিত উপায়ে থার্ডপার্টি ক্লাউডে আপলোড করার মেথড
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", "unsigned_preset"); 
+            showLoading("ফাইলটি ক্লাউডে প্রসেস হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...");
 
             try {
-                // এটি ফাইলটিকে একটি ওপেন সুরক্ষিত লিংকে রূপান্তর করে যা ইউজার ডাউনলোড করতে পারবে
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = async function () {
                     const base64Data = reader.result;
-                    
-                    // আমরা ডাটা সরাসরি ফায়ারবেস ফাইল নোডে পুশ করছি
-                    const fileId = "file_" + Date.now();
+                    const fileUniqueId = "id_" + Date.now(); // ইউনিক আইডি জেনারেট হচ্ছে যা আগের ডাউনলোড লক ভেঙে দেবে
+
                     const fileData = { 
+                        fileId: fileUniqueId,
                         fileName: name, 
-                        fileUrl: base64Data, // ফাইলটি সরাসরি এনকোড হয়ে জমা থাকবে
+                        matchNumber: matchNumber,
+                        fileUrl: base64Data,
                         targetUser: targetUser 
                     };
                     
-                    await fetch(`${FIREBASE_URL}/files/${fileId}.json`, { 
+                    // ডাটাবেজে ইউজারের নিজস্ব ডিরেক্টরিতে ফাইল রাইট হচ্ছে
+                    await fetch(`${FIREBASE_URL}/files/${targetUser}.json`, { 
                         method: 'PUT', 
                         body: JSON.stringify(fileData) 
                     });
                     
                     hideLoading();
-                    alert(`সফলভাবে ফাইলটি '${targetUser}' এর জন্য আপলোড হয়েছে!`);
+                    alert(`ফাইলটি সফলভাবে '${targetUser}' এর অ্যাকাউন্টে সাবমিট করা হয়েছে!`);
                     document.getElementById("fileNameInput").value = "";
+                    document.getElementById("matchNumberInput").value = "";
                     fileInput.value = "";
                 };
             } catch(error) {
                 hideLoading();
-                alert("ফাইল সাইজ অনেক বড়! অনুগ্রহ করে ছোট ফাইল বা পিডিএফ আপলোড করুন।");
+                alert("ফাইল প্রসেসিং ব্যর্থ হয়েছে!");
             }
         }
 
